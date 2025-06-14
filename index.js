@@ -1,24 +1,32 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const adminRoutes = require('./routes/adminRoutes');
-
-
 require('dotenv').config();
 
 const app = express();
 
-// ✅ Enable CORS
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+// ✅ Update CORS to allow Firebase domain
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://blog-frontend-91694.web.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 
 app.use(express.json());
 
 // Routes
-const authRoutes = require('./routes/authRoutes');
-const blogRoutes = require('./routes/blogRoutes');
-
-app.use('/api/auth', authRoutes);
-app.use('/api/blogs', blogRoutes);
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/blogs', require('./routes/blogRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 
